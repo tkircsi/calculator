@@ -10,6 +10,7 @@ import (
 
 	"github.com/tkircsi/calculator/calculatorpb"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
 )
 
 func main() {
@@ -56,20 +57,26 @@ func SqrtTest(c calculatorpb.CalculatorServiceClient) {
 	fmt.Println(strings.Repeat("-", 60))
 	n := int32(36)
 
-	reqNoError := &calculatorpb.SqrtRequest{N: n}
-	fmt.Printf("Sending SqrtRequest: %s\n", reqNoError.String())
-	resp, err := c.Sqrt(context.Background(), reqNoError)
+	req := &calculatorpb.SqrtRequest{N: n}
+	fmt.Printf("Sending SqrtRequest: %s\n", req)
+	resp, err := c.Sqrt(context.Background(), req)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Printf("Received SqrtResponse: %s\n", resp)
 
 	n = int32(-4)
-	reqNoError = &calculatorpb.SqrtRequest{N: n}
-	fmt.Printf("Sending SqrtRequest: %s\n", reqNoError.String())
-	resp, err = c.Sqrt(context.Background(), reqNoError)
+	req = &calculatorpb.SqrtRequest{N: n}
+	fmt.Printf("Sending SqrtRequest: %s\n", req)
+	resp, err = c.Sqrt(context.Background(), req)
 	if err != nil {
-		log.Fatal(err)
+		resErr, ok := status.FromError(err)
+		if ok {
+			fmt.Println(resErr.Message())
+			fmt.Println(resErr.Code())
+		} else {
+			log.Fatal(err)
+		}
 	}
 	fmt.Printf("Received SqrtResponse: %s\n", resp)
 }
